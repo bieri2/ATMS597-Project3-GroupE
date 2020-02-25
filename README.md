@@ -1,5 +1,5 @@
 # ATMS597-Project3-GroupE
-# Group Members: Carolina Bieri, Arka Mitra, and Jeff Thayer
+## Group Members: Carolina Bieri, Arka Mitra, and Jeff Thayer
 
 This python module finds austral summertime (DJF) extreme precipitation days near Jakarta, Indonesia (6.21S, 106.85E) over the period 1996-2019 using daily data from the Global Precipitation Climatology Project (GPCP), and then creates composite maps of several NCEP Reanalysis products to analyze the associated global circulation patterns during these extreme precipitation days. Monthly-mean NCEP Reanalysis products provide a long-term mean for DJF over the period 1981-2010, which is used to construct anomalies. 
 
