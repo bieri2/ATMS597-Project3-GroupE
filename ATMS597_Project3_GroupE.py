@@ -509,3 +509,4 @@ cbar.set_label(label = 'Precipitable water ($kg/m^{2}$)',fontsize = 14)
 
 plt.title('Precipitable water - DJF', fontsize = 15)
 #plt.show()
+#---------------------------------------End of code block------------------------------------------------------------------------------
