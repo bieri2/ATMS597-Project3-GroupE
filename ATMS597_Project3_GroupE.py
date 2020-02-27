@@ -322,3 +322,190 @@ cb.set_label(r'Surface Temperatures [K]', fontsize=14)
 plt.show()
 
 #---------------------------------------End of Code Block----------------------------------------------------------------------------
+
+
+#---------------------------------------Long term mean plots (1981-2010)-------------------------------------------------------------
+## Importing Long-term Mean NCEP Reanalysis data from 1981-2010, only selecting DJF
+
+# Get list of dates to be used when selecting data 
+months = xr.cftime_range(start = '0001-01-01', end = '0001-12-01', freq = 'MS', calendar = 'standard') # selecting long-term mean data for 1981-2010 with cftime.DatetimeGregorian format
+months = months[(months.month == 12) | (months.month == 1) | (months.month == 2)] # selecting long-term mean data for DJF in 1981-2010
+
+# Define URLs from which to download data
+url_p = 'https://www.esrl.noaa.gov/psd/thredds/dodsC/Datasets/ncep.reanalysis.derived/pressure/'
+url_s = 'https://www.esrl.noaa.gov/psd/thredds/dodsC/Datasets/ncep.reanalysis.derived/surface/'
+
+# Extract data - winds, geopotential height, specific humidity, temperature, precipitable water at different heights 
+ds_Uwind_250hPa_LTM   = xr.open_dataset(url_p + 'uwnd.mon.1981-2010.ltm.nc', engine  = 'netcdf4').sel(level = 250, time = months)
+ds_Vwind_250hPa_LTM   = xr.open_dataset(url_p + 'vwnd.mon.1981-2010.ltm.nc', engine  = 'netcdf4').sel(level = 250, time = months)
+ds_GeopHgt_500hPa_LTM = xr.open_dataset(url_p + 'hgt.mon.1981-2010.ltm.nc', engine   = 'netcdf4').sel(level = 500, time = months)
+ds_Uwind_500hPa_LTM   = xr.open_dataset(url_p + 'uwnd.mon.1981-2010.ltm.nc', engine  = 'netcdf4').sel(level = 500, time = months)
+ds_Vwind_500hPa_LTM   = xr.open_dataset(url_p + 'vwnd.mon.1981-2010.ltm.nc', engine  = 'netcdf4').sel(level = 500, time = months)
+ds_Uwind_850hPa_LTM   = xr.open_dataset(url_p + 'uwnd.mon.1981-2010.ltm.nc', engine  = 'netcdf4').sel(level = 850, time = months)
+ds_Vwind_850hPa_LTM   = xr.open_dataset(url_p + 'vwnd.mon.1981-2010.ltm.nc', engine  = 'netcdf4').sel(level = 850, time = months)
+ds_SpecHum_850hPa_LTM = xr.open_dataset(url_p + 'shum.mon.1981-2010.ltm.nc', engine  = 'netcdf4').sel(level = 850, time = months)
+ds_AirTemp_850hPa_LTM = xr.open_dataset(url_p + 'air.mon.1981-2010.ltm.nc', engine   = 'netcdf4').sel(level = 850, time = months)
+ds_Uwind_sig995_LTM   = xr.open_dataset(url_s + 'uwnd.sig995.mon.1981-2010.ltm.nc', engine    = 'netcdf4').sel(time = months)
+ds_Vwind_sig995_LTM   = xr.open_dataset(url_s + 'vwnd.sig995.mon.1981-2010.ltm.nc', engine    = 'netcdf4').sel(time = months)
+ds_SkinTemp_Sfc_LTM   = xr.open_dataset(url_s + '_gauss/skt.sfc.mon.1981-2010.ltm.nc', engine = 'netcdf4').sel(time = months)
+ds_PrecipWater_LTM    = xr.open_dataset(url_s + 'pr_wtr.eatm.mon.1981-2010.ltm.nc', engine    = 'netcdf4').sel(time = months)
+
+#---------------------------------------Plotting 250 mb wind speed and direction------------------------------------------------------
+# Plot 250 mb wind speed and direction
+fig = plt.figure(figsize = (15, 8))
+ax  = fig.add_subplot(1, 1, 1, projection = ccrs.PlateCarree(central_longitude = 180))
+ax.coastlines()
+
+# Calculate means over DJF
+uwind_djf_ltm_250 = ds_Uwind_250hPa_LTM.mean(dim = 'time')['uwnd']
+vwind_djf_ltm_250 = ds_Vwind_250hPa_LTM.mean(dim = 'time')['vwnd']
+
+# Calculate wind speed using U and V components
+wind_speed_250    = np.sqrt(uwind_djf_ltm_250**2 + vwind_djf_ltm_250**2)
+
+# Plot filled contours
+c = ax.contourf(wind_speed_250.lon, wind_speed_250.lat,
+            wind_speed_250, 10, transform=ccrs.PlateCarree(), cmap='RdPu', alpha=0.8)
+
+# Plot winds using barbs
+ax.barbs(uwind_djf_ltm_250.lon.values[::4], uwind_djf_ltm_250.lat.values[::4], 
+         uwind_djf_ltm_250[::4,::4], vwind_djf_ltm_250[::4,::4], 
+         length = 5, sizes = dict(emptybarb = 0.25, spacing = 0.2, height = 0.5),
+         linewidth = 0.95, alpha = 0.5)
+
+# Plot color bar
+cbar = fig.colorbar(c)
+cbar.ax.tick_params(labelsize=14) 
+cbar.set_label(label='Wind speed (m/s)',fontsize=14)
+
+plt.title('250 mb wind speed and direction - DJF', fontsize=15)
+#plt.show()
+
+#---------------------------------------Plotting 500 mb wind speed and direction------------------------------------------------------
+# Plot 500 mb geopotential height and winds
+fig = plt.figure(figsize = (15, 8))
+ax  = fig.add_subplot(1, 1, 1, projection=ccrs.PlateCarree(central_longitude = 180))
+ax.coastlines()
+
+# Calculate means for DJF
+uwind_djf_ltm_500 = ds_Uwind_500hPa_LTM.mean(dim = 'time')['uwnd']
+vwind_djf_ltm_500 = ds_Vwind_500hPa_LTM.mean(dim = 'time')['vwnd']
+gh_djf_ltm_500    = ds_GeopHgt_500hPa_LTM.mean(dim = 'time')['hgt']
+
+# Plot filled contours
+c = ax.contourf(gh_djf_ltm_500.lon, gh_djf_ltm_500.lat,
+            gh_djf_ltm_500, 10, transform=ccrs.PlateCarree(), cmap='Purples', alpha=0.8)
+
+# Plot winds using barbs
+ax.barbs(uwind_djf_ltm_500.lon.values[::4], uwind_djf_ltm_500.lat.values[::4], 
+         uwind_djf_ltm_500[::4,::4], vwind_djf_ltm_500[::4,::4], 
+         length = 5,sizes = dict(emptybarb = 0.25, spacing = 0.2, height = 0.5),
+         linewidth = 0.95, alpha = 0.6)
+
+# Plot color bar
+cbar = fig.colorbar(c)
+cbar.ax.tick_params(labelsize=14) 
+cbar.set_label(label = 'Geopotential height (m)',fontsize=14)
+
+plt.title('500 mb geopotential height and winds - DJF', fontsize=15)
+#plt.show()
+
+#---------------------------------------Plotting 850 mb wind speed, temperature, and humidity------------------------------------------
+
+# Plot 850 mb temperature, specific humidity, and winds
+
+# Plot winds and temperature 
+fig = plt.figure(figsize = (15, 15))
+ax  = fig.add_subplot(2, 1, 1, projection = ccrs.PlateCarree(central_longitude = 180))
+ax.coastlines()
+
+# Calculate mean values for DJF
+uwind_djf_ltm_850 = ds_Uwind_850hPa_LTM.mean(dim = 'time')['uwnd']
+vwind_djf_ltm_850 = ds_Vwind_850hPa_LTM.mean(dim = 'time')['vwnd']
+t_djf_ltm_850     = ds_AirTemp_850hPa_LTM.mean(dim = 'time')['air']
+
+# Plot filled contours 
+c = ax.contourf(t_djf_ltm_850.lon, t_djf_ltm_850.lat,
+            t_djf_ltm_850 + 273.15,10, transform = ccrs.PlateCarree(), cmap = 'Reds', alpha=0.8)
+
+# Plot winds using barbs
+ax.barbs(uwind_djf_ltm_850.lon.values[::4], uwind_djf_ltm_850.lat.values[::4], 
+         uwind_djf_ltm_850[::4, ::4], vwind_djf_ltm_850[::4, ::4], 
+         length = 5,sizes = dict(emptybarb = 0.25, spacing = 0.2, height = 0.5),
+         linewidth = 0.95, alpha = 0.6)
+
+cbar = fig.colorbar(c)
+cbar.ax.tick_params(labelsize = 14) 
+cbar.set_label(label = 'Air temperature (K)', fontsize = 14)
+
+plt.title('850 mb temperature and winds - DJF', fontsize = 15)
+
+# Plot specific humidity
+ax2 = fig.add_subplot(2, 1, 2, projection=ccrs.PlateCarree(central_longitude = 180))
+
+# Calculate mean for DJF
+sh_djf_ltm_850 = ds_SpecHum_850hPa_LTM.mean(dim = 'time')['shum']
+ax2.coastlines()
+
+# Plot filled contours
+c2 = ax2.contourf(sh_djf_ltm_850.lon, sh_djf_ltm_850.lat,
+            sh_djf_ltm_850, 10, transform = ccrs.PlateCarree(), cmap = 'Blues', alpha = 0.8)
+
+# Plot winds using barbs
+ax2.barbs(uwind_djf_ltm_850.lon.values[::4], uwind_djf_ltm_850.lat.values[::4], 
+         uwind_djf_ltm_850[::4, ::4], vwind_djf_ltm_850[::4, ::4], 
+         length = 5,sizes = dict(emptybarb = 0.25, spacing = 0.2, height = 0.5),
+         linewidth = 0.95, alpha = 0.6)
+
+cbar2 = fig.colorbar(c2)
+cbar2.ax.tick_params(labelsize = 14) 
+cbar2.set_label(label = 'Specific humidity (g/kg)', fontsize = 14)
+
+ax2.set_title('850 mb specific humidity and winds - DJF', fontsize = 15)
+
+#plt.show()
+
+#---------------------------------------Plotting surface temperature and winds---------------------------------------------------------
+
+fig = plt.figure(figsize = (15, 8))
+ax = fig.add_subplot(1, 1, 1, projection = ccrs.PlateCarree(central_longitude = 180))
+ax.coastlines()
+
+# Calculate means for DJF
+uwind_djf_ltm_sfc = ds_Uwind_sig995_LTM.mean(dim = 'time')['uwnd']
+vwind_djf_ltm_sfc = ds_Vwind_sig995_LTM.mean(dim = 'time')['vwnd']
+t_sfc = ds_SkinTemp_Sfc_LTM.mean(dim = 'time')['skt']
+
+# Plot filled contours
+c = ax.contourf(t_sfc.lon, t_sfc.lat,
+                t_sfc, 10, transform=ccrs.PlateCarree(), cmap = 'rainbow', alpha = 0.8)
+
+# Plot winds using barbs
+ax.barbs(uwind_djf_ltm_sfc.lon.values[::4], uwind_djf_ltm_sfc.lat.values[::4], 
+         uwind_djf_ltm_sfc[::4, ::4], vwind_djf_ltm_sfc[::4, ::4], 
+         length = 5, sizes = dict(emptybarb = 0.25, spacing = 0.2, height = 0.5),
+         linewidth = 0.95, alpha = 0.5)
+
+cbar = fig.colorbar(c)
+cbar.ax.tick_params(labelsize = 14) 
+cbar.set_label(label = 'Skin temperature (deg C)',fontsize = 14)
+
+plt.title('Surface skin temperature and winds - DJF', fontsize = 15)
+#plt.show()
+
+#---------------------------------------Plotting precipitable water---------------------------------------------------------------------
+fig = plt.figure(figsize = (15, 8))
+ax = fig.add_subplot(1, 1, 1, projection=ccrs.PlateCarree(central_longitude = 180))
+ax.coastlines()
+
+pw = ds_PrecipWater_LTM.mean(dim = 'time')['pr_wtr']
+pw = pw.where(pw > 0)
+
+c = ax.contourf(pw.lon, pw.lat, pw, 10, transform = ccrs.PlateCarree(), cmap = 'Greens', alpha = 0.8)
+
+cbar = fig.colorbar(c)
+cbar.ax.tick_params(labelsize = 14) 
+cbar.set_label(label = 'Precipitable water ($kg/m^{2}$)',fontsize = 14) 
+
+plt.title('Precipitable water - DJF', fontsize = 15)
+#plt.show()
