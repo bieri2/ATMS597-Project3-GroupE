@@ -8,6 +8,7 @@ Extreme precipitation days are identified as the 95th percentile and above of da
 NCEP Reanalysis products (i.e. humidity, temperature, winds, precipitable water, geopotential height) are then compiled for extreme precipitation days and composited to examine typical patterns associated with these extreme days. Plots are created for these variables to facilitate analysis. Daily means as well as mean daily anomalies are generated. In order to obtain an understanding of general long-term patterns, DJF means for 1981-2010 are also plotted.
 
 GPCP data were obtained via this website: https://www.ncei.noaa.gov/data/global-precipitation-climatology-project-gpcp-daily/access/
+
 NCEP Reanalysis data were obtained here: https://www.esrl.noaa.gov/psd/thredds/catalog/Datasets/catalog.html
 
-Data were downloaded using tools such as `wget` and `xarray.open_dataset`.
+Data were downloaded using tools such as `wget` and `xarray.open_dataset`. `cartopy` functions and methods were used to create plots. 
