@@ -11,4 +11,4 @@ GPCP data were obtained via this website: https://www.ncei.noaa.gov/data/global-
 
 NCEP Reanalysis data were obtained here: https://www.esrl.noaa.gov/psd/thredds/catalog/Datasets/catalog.html
 
-Data were downloaded using tools such as `wget` and `xarray.open_dataset`. `cartopy` functions and methods were used to create plots. 
+Data were downloaded using tools such as `wget` and `xarray.open_dataset`. `xarray` was also used extensively to reduce data. `cartopy` functions and methods were used to create plots. 
