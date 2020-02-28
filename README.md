@@ -5,7 +5,7 @@ This Python script finds austral summertime (DJF) extreme precipitation days nea
 
 Extreme precipitation days are identified as the 95th percentile and above of daily precipitation for 1996-2019 using the grid point nearest to Jakarta, Indonesia during DJF. A cumulative distribution function (CDF) using all precipitation values (including non-extreme values) is calculated. This makes it possible to obtain an idea of the shape of the dataset and compare the 95th percentile value to the rest of the data.
 
-NCEP Reanalysis products (i.e. humidity, temperature, winds, precipitable water, geopotential height) are then compiled for extreme precipitation days and composited to examine typical patterns associated with these extreme days. Plots are created for these variables to facilitate analysis. Daily means as well as mean daily anomalies are generated. In order to obtain an understanding of general long-term patterns, DJF means for 1981-2010 are also plotted.
+NCEP Reanalysis products (i.e. humidity, temperature, winds, precipitable water, geopotential height) are then compiled for extreme precipitation days and composited to examine typical patterns associated with these extreme days. Plots are created for these variables to facilitate analysis. Daily means as well as mean daily anomalies relative to the DJF long-term means over 1981-2010 are generated. In order to obtain an understanding of general long-term patterns, the DJF means for 1981-2010 are also plotted.
 
 GPCP data were obtained via this website: https://www.ncei.noaa.gov/data/global-precipitation-climatology-project-gpcp-daily/access/
 
