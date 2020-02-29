@@ -19,7 +19,7 @@ def is_djf(month):
 
 #Files must be downloaded from online server with the same directory structure...
 #...using the "wget -r -nH" command 
-years = np.arange(1996,2020)
+years = np.arange(1996, 2020)
 gpcp_daily_data_directory = "/content/drive/My Drive/noaa_data_project3/data/global-precipitation-climatology-project-gpcp-daily/access/"
 output_nc_dir = "/content/drive/My Drive/"
 
@@ -27,16 +27,16 @@ output_nc_dir = "/content/drive/My Drive/"
 #This takes care of any duplicate values
 count = 0
 times = []
-for i in range(0,len(years)): 
+for i in range(0, len(years)): 
   nc_files = sorted(glob.glob(gpcp_daily_data_directory + str(years[i]) + "/*.nc"))
   for n in range(0,len(nc_files)):
-    filename = nc_files[n].replace(gpcp_daily_data_directory+str(years[i]),'')
-    date = filename.split('_')[3].replace('d','')
+    filename = nc_files[n].replace(gpcp_daily_data_directory + str(years[i]),'')
+    date = filename.split('_')[3].replace('d', '')
     date = pd.to_datetime(date, format='%Y%m%d')
     times = np.append(times, date)
     
-latitude = np.arange(-90.0,90.0)
-longitude = np.arange(0.0,360.0)
+latitude = np.arange(-90.0, 90.0)
+longitude = np.arange(0.0, 360.0)
 data = np.zeros((len(times),len(latitude),len(longitude),1))
 
 count = 0 #loop over years and store daily data into 'data' array
@@ -52,14 +52,14 @@ for i in range(0, len(years)):
     except:
       continue
     count = count + 1
-data1 = data.squeeze(axis=3)
+data1 = data.squeeze(axis = 3)
 precip_agg = xr.DataArray(data1, coords=[times, latitude, longitude], dims=['time', 'latitude', 'longitude'])
-precip_agg.to_netcdf(output_nc_dir+'Aggregate_GCPC_daily_1996_2019.nc') #Output NetCDF file generated and saved
+precip_agg.to_netcdf(output_nc_dir + 'Aggregate_GCPC_daily_1996_2019.nc') #Output NetCDF file generated and saved
 #---------------------------------------End of Code Block----------------------------------------------------------------------------
 
 #---------------------------------------Extreme precip, CDF for Jakarta DJF rainfall-------------------------------------------------
 #All future analysis will now be done off the combined NetCDF dataset
-precip_agg = xr.open_dataset(output_nc_dir+'Aggregate_GCPC_daily_1996_2019.nc')
+precip_agg = xr.open_dataset(output_nc_dir + 'Aggregate_GCPC_daily_1996_2019.nc')
 #Opened and stored the dataset in the xarray dataset precip_agg
     
 #The following code-block selects the data for the grid cell closest to Jakarta, Indonesia
@@ -67,16 +67,16 @@ precip_agg = xr.open_dataset(output_nc_dir+'Aggregate_GCPC_daily_1996_2019.nc')
 #Precip > 200 mm/day are rejected. 95 %-ile rainfall is then calculated as 26 mm/day
 #Dates above the 95 %-ile value are reatained in the xarray dataset 'pcp_above_dates'. 
 #Precipitation data from Jakarta for these extereme precip days are stored in 'extreme'.
-pcp_j = precip_agg.sel(latitude=-6.21,longitude=106.85,method='nearest')
-pcp_j = pcp_j.sel(time=is_djf(pcp_j['time.month']))
+pcp_j = precip_agg.sel(latitude=-6.21, longitude=106.85, method='nearest')
+pcp_j = pcp_j.sel(time = is_djf(pcp_j['time.month']))
 pcp_j = pcp_j.where(pcp_j != -99999.0)
 pcp_j = pcp_j.where(pcp_j < 200.)
 pcp_quant = pcp_j.quantile(0.95)
 precip = pcp_j.to_array()
 pcp_quant = pcp_quant.to_array().values
-pcp_above_dates = pcp_j['time'][np.where(precip[0,:]>=pcp_quant[:])]
+pcp_above_dates = pcp_j['time'][np.where(precip[0,:] >= pcp_quant[:])]
 #print(pcp_above_dates)
-extreme = precip[0,:][np.where(precip[0,:]>=pcp_quant[:])]
+extreme = precip[0,:][np.where(precip[0,:] >= pcp_quant[:])]
 #print(extreme)
 
 
@@ -96,12 +96,12 @@ x[:] = rain_95
 y[:] = 0.95
 
 #Plot CDF and 95%-ile rainfall over Jakarta in the required months
-plt.figure(figsize=(6,6))
+plt.figure(figsize = (6,6))
 ax = plt.gca()
 plt.plot(edges[1:], cdf)
-plt.scatter(x,np.arange(0,1.,0.01),color='k',s=6.)
-plt.scatter(np.arange(0,70.,70/100),y,color='r',s=6.)
-plt.plot(y,y,'k')
+plt.scatter(x,np.arange(0,1., 0.01), color='k', s=6.)
+plt.scatter(np.arange(0,70., 70/100), y, color='r', s=6.)
+plt.plot(y, y, 'k')
 plt.ylabel('CDF', fontsize=14)
 plt.xlabel('Daily Average Rainfall near Jakarta (mm)', fontsize=14)
 major_ticks = np.arange(0, 101, 10)
@@ -111,11 +111,11 @@ ax.set_xticks(minor_ticks, minor=True)
 ax.set_yticks(major_ticks/100.)
 ax.set_yticks(minor_ticks/100., minor=True)
 plt.grid()
-ax.grid(which='minor', alpha=0.2)
-ax.grid(which='major', alpha=0.5)
+ax.grid(which='minor', alpha = 0.2)
+ax.grid(which='major', alpha = 0.5)
 plt.xlim(-.50,70.)
 plt.ylim(0.3,1.05)
-plt.title('CDF and 95 percentile rainfall \n for Jakarta, Indonesia (DJF)', fontsize=14)
+plt.title('CDF and 95 percentile rainfall \n for Jakarta, Indonesia (DJF)', fontsize = 14)
 plt.savefig(output_nc_dir+'JAKARTA_DJF_CDF.png', dpi=300)
 #plt.show()
 #---------------------------------------End of code block------------------------------------------------------------------------------
@@ -142,7 +142,7 @@ combined_PrecipWater = xr.open_dataset('/content/drive/My Drive/Combined_fields/
 #Rotate longitudes cyclically by 180 degrees to make plots start at -180 degrees.
 lats = combined_Uwind_250hPa['lat'][:]
 lons = combined_Uwind_250hPa['lon'][:]
-lons_cyclic = np.roll(lons,71)
+lons_cyclic = np.roll(lons, 71)
 
 # level = 250 hPa
 # Fields --> Wind barbs and speeds
@@ -150,26 +150,26 @@ uwnd_level = combined_Uwind_250hPa
 uwnd_data = np.roll(uwnd_level['uwnd'].mean('time'),72,axis=1)
 vwnd_level = combined_Vwind_250hPa
 vwnd_data = np.roll(vwnd_level['vwnd'].mean('time'),72,axis=1)
-winds = np.sqrt(uwnd_data[:,:]**2+vwnd_data[:,:]**2)
-plt.figure(figsize=(16,16))
-ax = plt.axes(projection=ccrs.PlateCarree())
+winds = np.sqrt(uwnd_data[:,:]**2 + vwnd_data[:,:]**2)
+plt.figure(figsize = (16, 16))
+ax = plt.axes(projection = ccrs.PlateCarree())
 plt.pcolormesh(lons_cyclic, lats, winds, 
-              transform=ccrs.PlateCarree(), cmap='winter')
+              transform = ccrs.PlateCarree(), cmap = 'winter')
 ax.barbs(lons_cyclic[::4], lats[::2], uwnd_data[::2,::4],
-          vwnd_data[::2,::4], length=4)
+          vwnd_data[::2,::4], length = 4)
 # ax.quiver(lons_cyclic[::4], lats[::2], uwnd_data[::2,::4],
 #           vwnd_data[::2,::4])
-gl = ax.gridlines(crs=ccrs.PlateCarree(), draw_labels=True,
-                  linewidth=1, color='gray', alpha=0.5, linestyle='-')
+gl = ax.gridlines(crs = ccrs.PlateCarree(), draw_labels=True,
+                  linewidth = 1, color = 'gray', alpha = 0.5, linestyle = '-')
 #set where the gridlines go
-gl.xlocator = mticker.FixedLocator(np.arange(-180,181,30))
-gl.ylocator = mticker.FixedLocator(np.arange(-90,91,30))
+gl.xlocator = mticker.FixedLocator(np.arange(-180, 181, 30))
+gl.ylocator = mticker.FixedLocator(np.arange(-90, 91, 30))
 gl.xlabels_top = False
 gl.ylabels_right = False
-plt.title('250-hPa Wind Speeds (m/s) and Wind Barbs \n for extreme precipitation days over Jakarta, Indonesia', fontsize=15)
+plt.title('250-hPa Wind Speeds (m/s) and Wind Barbs \n for extreme precipitation days over Jakarta, Indonesia', fontsize = 15)
 ax.coastlines()
-cb = plt.colorbar(orientation='horizontal', shrink=0.5, pad=0.07)
-cb.set_label(r'Winds speeds [$m s^{-1}$] at 250 hPa', fontsize=14)
+cb = plt.colorbar(orientation = 'horizontal', shrink = 0.5, pad = 0.07)
+cb.set_label(r'Winds speeds [$m s^{-1}$] at 250 hPa', fontsize = 14)
 plt.clim(0,40)
 plt.show()
 
@@ -177,13 +177,13 @@ plt.show()
 # Fields --> Wind barbs and Geopotential Heights
 # Fields --> Wind barbs and Vertical Vorticity
 uwnd_level = combined_Uwind_500hPa
-uwnd_data = np.roll(uwnd_level['uwnd'].mean('time'),72,axis=1)
+uwnd_data = np.roll(uwnd_level['uwnd'].mean('time'),72, axis=1)
 vwnd_level = combined_Vwind_500hPa
-vwnd_data = np.roll(vwnd_level['vwnd'].mean('time'),72,axis=1)
+vwnd_data = np.roll(vwnd_level['vwnd'].mean('time'),72, axis=1)
 hgt_level = combined_GeopHgt_500hPa
-hgt_data = np.roll(hgt_level['hgt'].mean('time'),72,axis=1)
+hgt_data = np.roll(hgt_level['hgt'].mean('time'),72, axis=1)
 omega_level = combined_Omega_500hPa
-omega_data = np.roll(omega_level['omega'].mean('time'),72,axis=1)
+omega_data = np.roll(omega_level['omega'].mean('time'),72, axis=1)
 plt.figure(figsize=(16,16))
 ax = plt.axes(projection=ccrs.PlateCarree())
 cs2 = plt.pcolormesh(lons_cyclic, lats, hgt_data, 
@@ -233,13 +233,13 @@ plt.show()
 # Fields --> Wind barbs and Air Temperatures
 # Fields --> Wind barbs and Specific Humidity
 uwnd_level = combined_Uwind_850hPa
-uwnd_data = np.roll(uwnd_level['uwnd'].mean('time'),72,axis=1)
+uwnd_data = np.roll(uwnd_level['uwnd'].mean('time'),72, axis=1)
 vwnd_level = combined_Vwind_850hPa
-vwnd_data = np.roll(vwnd_level['vwnd'].mean('time'),72,axis=1)
+vwnd_data = np.roll(vwnd_level['vwnd'].mean('time'),72, axis=1)
 shum_level = combined_SpecHum_850hPa
-shum_data = np.roll(shum_level['shum'].mean('time'),72,axis=1)
+shum_data = np.roll(shum_level['shum'].mean('time'),72, axis=1)
 air_level = combined_AirTemp_850hPa
-air_data = np.roll(air_level['air'].mean('time'),72,axis=1)
+air_data = np.roll(air_level['air'].mean('time'),72, axis=1)
 plt.figure(figsize=(16,16))
 ax = plt.axes(projection=ccrs.PlateCarree())
 cs2 = plt.pcolormesh(lons_cyclic, lats, air_data, 
@@ -266,7 +266,7 @@ plt.show()
 # Fields --> Precipitable Water in the entire atmospheric column
 
 pwtr_level = combined_PrecipWater
-pwtr_data = np.roll(pwtr_level['pr_wtr'].mean('time'),72,axis=1)
+pwtr_data = np.roll(pwtr_level['pr_wtr'].mean('time'),72, axis=1)
 plt.figure(figsize=(16,16))
 ax = plt.axes(projection=ccrs.PlateCarree())
 cs2 = plt.pcolormesh(lons_cyclic, lats, air_data, 
