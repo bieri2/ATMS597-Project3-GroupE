@@ -599,3 +599,253 @@ plt.show()
 
 
 #---------------------------------------End of code block------------------------------------------------------------------------------
+
+## Calculate Mean Composite maps over (1) Extreme Precipitation Days & (2) Seasonal Anomalies
+
+# Mean of daily reanalysis fields over extreme precipitation days
+combined_Uwind_250hPa_AVG = np.mean(combined_Uwind_250hPa['uwnd'], axis = 0)
+combined_Vwind_250hPa_AVG = np.mean(combined_Vwind_250hPa['vwnd'], axis = 0)
+combined_Uwind_500hPa_AVG = np.mean(combined_Uwind_500hPa['uwnd'], axis = 0)
+combined_Vwind_500hPa_AVG = np.mean(combined_Vwind_500hPa['vwnd'], axis = 0)
+combined_GeopHgt_500hPa_AVG = np.mean(combined_GeopHgt_500hPa['hgt'], axis = 0)
+combined_Omega_500hPa_AVG = np.mean(combined_Omega_500hPa['omega'], axis = 0)
+combined_Uwind_850hPa_AVG = np.mean(combined_Uwind_850hPa['uwnd'], axis = 0)
+combined_Vwind_850hPa_AVG = np.mean(combined_Vwind_850hPa['vwnd'], axis = 0)
+combined_SpecHum_850hPa_AVG = np.mean(combined_SpecHum_850hPa['shum'] * 1000, axis = 0)
+combined_AirTemp_850hPa_AVG = np.mean(combined_AirTemp_850hPa['air'], axis = 0)
+combined_Uwind_sig995_AVG = np.mean(combined_Uwind_sig995['uwnd'], axis = 0)
+combined_Vwind_sig995_AVG = np.mean(combined_Vwind_sig995['vwnd'], axis = 0)
+combined_SkinTemp_Sfc_AVG = np.mean(combined_SkinTemp_Sfc['skt'], axis = 0)
+combined_PrecipWater_AVG = np.mean(combined_PrecipWater['pr_wtr'], axis = 0)
+
+# Seasonal Anomaly fields: [mean daily reanalysis fields over extreme precipitation days] - [mean over DJF for long-term mean fields]
+combined_Uwind_250hPa_Anomaly = combined_Uwind_250hPa_AVG - np.mean(ds_Uwind_250hPa_LTM['uwnd'], axis = 0)
+combined_Vwind_250hPa_Anomaly = combined_Vwind_250hPa_AVG - np.mean(ds_Vwind_250hPa_LTM['vwnd'], axis = 0)
+combined_Uwind_500hPa_Anomaly = combined_Uwind_500hPa_AVG - np.mean(ds_Uwind_500hPa_LTM['uwnd'], axis = 0)
+combined_Vwind_500hPa_Anomaly = combined_Vwind_500hPa_AVG - np.mean(ds_Vwind_500hPa_LTM['vwnd'], axis = 0)
+combined_GeopHgt_500hPa_Anomaly = combined_GeopHgt_500hPa_AVG - np.mean(ds_GeopHgt_500hPa_LTM['hgt'], axis = 0)
+combined_Omega_500hPa_Anomaly = combined_Omega_500hPa_AVG - np.mean(ds_Omega_500hPa_LTM['omega'], axis = 0)
+combined_Uwind_850hPa_Anomaly = combined_Uwind_850hPa_AVG - np.mean(ds_Uwind_850hPa_LTM['uwnd'], axis = 0)
+combined_Vwind_850hPa_Anomaly = combined_Vwind_850hPa_AVG - np.mean(ds_Vwind_850hPa_LTM['vwnd'], axis = 0)
+combined_SpecHum_850hPa_Anomaly = combined_SpecHum_850hPa_AVG - np.mean(ds_SpecHum_850hPa_LTM['shum'], axis = 0)
+combined_AirTemp_850hPa_Anomaly = combined_AirTemp_850hPa_AVG - np.mean(ds_AirTemp_850hPa_LTM['air'] + 273.15, axis = 0)
+combined_Uwind_sig995_Anomaly = combined_Uwind_sig995_AVG - np.mean(ds_Uwind_sig995_LTM['uwnd'], axis = 0)
+combined_Vwind_sig995_Anomaly = combined_Vwind_sig995_AVG - np.mean(ds_Vwind_sig995_LTM['vwnd'], axis = 0)
+combined_SkinTemp_Sfc_Anomaly = combined_SkinTemp_Sfc_AVG - np.mean(ds_SkinTemp_Sfc_LTM['skt'] + 273.15, axis = 0)
+combined_PrecipWater_Anomaly = combined_PrecipWater_AVG - np.mean(ds_PrecipWater_LTM['pr_wtr'], axis = 0)
+
+
+## Plotting 250-hPa Wind Speed and Direction Anomalies
+
+from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
+
+fig = plt.figure(figsize = (15, 8))
+
+ax = fig.add_subplot(1, 1, 1, projection = ccrs.PlateCarree(central_longitude = 180))
+plt.title('250-hPa Wind Speed and Direction Anomalies: DJF', fontsize = 22)
+ax.set_extent([29.9, 180.1, -45.1, 45.1], ccrs.PlateCarree())
+WindSpeed_250hPa_Anomaly = np.sqrt(combined_Uwind_250hPa_Anomaly**2 + combined_Vwind_250hPa_Anomaly**2)
+c1 = ax.contourf(combined_Uwind_250hPa_Anomaly.lon, combined_Uwind_250hPa_Anomaly.lat, WindSpeed_250hPa_Anomaly, levels = np.linspace(0, 5, 11), transform = ccrs.PlateCarree(), cmap = 'RdPu', alpha = 0.8)
+g1 = ax.gridlines(crs = ccrs.PlateCarree(), draw_labels = True,
+                  linewidth = 1, color = 'gray', alpha = 0.5, linestyle = '-')
+g1.xlocator = mticker.FixedLocator(np.arange(30, 181, 15))
+g1.ylocator = mticker.FixedLocator(np.arange(-90, 91, 15))
+g1.xformatter = LONGITUDE_FORMATTER
+g1.yformatter = LATITUDE_FORMATTER
+g1.xlabel_style = {'size': 12}
+g1.ylabel_style = {'size': 12}
+g1.xlabels_top = False
+g1.ylabels_right = False
+ax.coastlines()
+ax.plot(106.85, -6.21, 'ro', markersize = 10, transform = ccrs.PlateCarree())
+Q = ax.quiver(combined_Uwind_250hPa_Anomaly.lon[::3].values, combined_Uwind_250hPa_Anomaly.lat[::3].values, 
+         combined_Uwind_250hPa_Anomaly[::3, ::3].values, combined_Vwind_250hPa_Anomaly[::3, ::3].values, scale = 55., width = 0.005, headwidth = 4., headlength = 5.)
+ax.quiverkey(Q, 0.745, 0.87, 2, r'$2 \frac{m}{s}$', labelpos = 'E', coordinates = 'figure', fontproperties = {'size': '16'})
+cb = fig.colorbar(c1, shrink = 0.8)
+cb.set_label('Wind Speed Anomaly [m $s^{-1}$]', fontsize = 18)
+cb.set_ticks(np.arange(0, 6, 1))
+cb.ax.tick_params(labelsize = 14)
+
+plt.show()
+
+# figstring = '/content/drive/My Drive/Colab Notebooks/Project 3/JakartaIndonesia_250hPa_WindSpeed&DirectionAnomalies_DJF.png'
+# fig.savefig(figstring, orientation = 'landscape', dpi = 300)
+
+
+## Plotting 500-hPa Geopotential Height, Negative Omega, and Wind Anomalies
+
+from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
+
+fig = plt.figure(figsize = (15, 15))
+
+ax1 = fig.add_subplot(2, 1, 1, projection = ccrs.PlateCarree(central_longitude = 180))
+ax1.set_title('500-hPa Geop Hgt & Wind Anomalies: DJF', fontsize = 22)
+ax1.set_extent([29.9, 180.1, -45.1, 45.1], ccrs.PlateCarree())
+c1 = ax1.contourf(combined_GeopHgt_500hPa_Anomaly.lon, combined_GeopHgt_500hPa_Anomaly.lat, combined_GeopHgt_500hPa_Anomaly, levels = np.linspace(-30, 30, 21), transform = ccrs.PlateCarree(), cmap = 'bwr', alpha = 0.8)
+g1 = ax1.gridlines(crs = ccrs.PlateCarree(), draw_labels = True,
+                  linewidth = 1, color = 'gray', alpha = 0.5, linestyle = '-')
+g1.xlocator = mticker.FixedLocator(np.arange(30, 181, 15))
+g1.ylocator = mticker.FixedLocator(np.arange(-90, 91, 15))
+g1.xformatter = LONGITUDE_FORMATTER
+g1.yformatter = LATITUDE_FORMATTER
+g1.xlabel_style = {'size': 12}
+g1.ylabel_style = {'size': 12}
+g1.xlabels_top = False
+g1.ylabels_right = False
+ax1.coastlines()
+ax1.plot(106.85, -6.21, 'ro', markersize = 10, transform = ccrs.PlateCarree())
+Q1 = ax1.quiver(combined_Uwind_500hPa_Anomaly.lon[::3].values, combined_Uwind_500hPa_Anomaly.lat[::3].values, 
+         combined_Uwind_500hPa_Anomaly[::3, ::3].values, combined_Vwind_500hPa_Anomaly[::3, ::3].values, scale = 35., width = 0.005, headwidth = 4., headlength = 5.)
+ax1.quiverkey(Q1, 0.745, 0.89, 2, r'$2 \frac{m}{s}$', labelpos = 'E',coordinates = 'figure', fontproperties = {'size': '16'})
+cb1 = fig.colorbar(c1, shrink = 0.8)
+cb1.set_label('Geop Hgt Anomaly [m]', fontsize = 18)
+cb1.set_ticks(np.arange(-30, 31, 6))
+cb1.ax.tick_params(labelsize = 14)
+########################################################################################################
+
+ax2 = fig.add_subplot(2, 1, 2, projection = ccrs.PlateCarree(central_longitude = 180))
+ax2.set_title('500-hPa -Omega & Wind Anomalies: DJF', fontsize = 22)
+ax2.set_extent([29.9, 180.1, -45.1, 45.1], ccrs.PlateCarree())
+c2 = ax2.contourf(combined_Omega_500hPa_Anomaly.lon, combined_Omega_500hPa_Anomaly.lat, combined_Omega_500hPa_Anomaly * -864, levels = np.linspace(-30, 30, 21), transform = ccrs.PlateCarree(), cmap = 'PRGn', alpha = 0.8)
+g2 = ax2.gridlines(crs = ccrs.PlateCarree(), draw_labels = True,
+                  linewidth = 1, color = 'gray', alpha = 0.5, linestyle = '-')
+g2.xlocator = mticker.FixedLocator(np.arange(30, 181, 15))
+g2.ylocator = mticker.FixedLocator(np.arange(-90, 91, 15))
+g2.xformatter = LONGITUDE_FORMATTER
+g2.yformatter = LATITUDE_FORMATTER
+g2.xlabel_style = {'size': 12}
+g2.ylabel_style = {'size': 12}
+g2.xlabels_top = False
+g2.ylabels_right = False
+ax2.coastlines()
+ax2.plot(106.85, -6.21, 'ro', markersize = 10, transform = ccrs.PlateCarree())
+Q2 = ax2.quiver(combined_Uwind_500hPa_Anomaly.lon[::3].values, combined_Uwind_500hPa_Anomaly.lat[::3].values, 
+         combined_Uwind_500hPa_Anomaly[::3, ::3].values, combined_Vwind_500hPa_Anomaly[::3, ::3].values, scale = 35., width = 0.005, headwidth = 4., headlength = 5.)
+ax2.quiverkey(Q2, 0.745, 0.478, 2, r'$2 \frac{m}{s}$', labelpos = 'E', coordinates = 'figure', fontproperties = {'size': '16'})
+cb2 = fig.colorbar(c2, shrink = 0.8)
+cb2.set_label('-Omega Anomaly [hPa $day^{-1}$]', fontsize = 18)
+cb2.set_ticks(np.arange(-30, 31, 6))
+cb2.ax.tick_params(labelsize = 14)
+
+plt.show()
+
+# figstring = '/content/drive/My Drive/Colab Notebooks/Project 3/JakartaIndonesia_500hPa_GeopHgt&NegOmega&WindAnomalies_DJF.png'
+# fig.savefig(figstring, orientation = 'landscape', dpi = 300)
+
+
+## Plotting 850-hPa Air Temperature, Specific Humidity, and Wind Anomalies
+
+from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
+
+fig = plt.figure(figsize = (15, 15))
+
+ax1 = fig.add_subplot(2, 1, 1, projection = ccrs.PlateCarree(central_longitude = 180))
+ax1.set_title('850-hPa Air Temp & Wind Anomalies: DJF', fontsize = 22)
+ax1.set_extent([29.9, 180.1, -45.1, 45.1], ccrs.PlateCarree())
+c1 = ax1.contourf(combined_AirTemp_850hPa_Anomaly.lon, combined_AirTemp_850hPa_Anomaly.lat, combined_AirTemp_850hPa_Anomaly, levels = np.linspace(-2, 2, 21), transform = ccrs.PlateCarree(), cmap = 'RdBu_r', alpha = 0.8)
+g1 = ax1.gridlines(crs = ccrs.PlateCarree(), draw_labels = True,
+                  linewidth = 1, color = 'gray', alpha = 0.5, linestyle = '-')
+g1.xlocator = mticker.FixedLocator(np.arange(30, 181, 15))
+g1.ylocator = mticker.FixedLocator(np.arange(-90, 91, 15))
+g1.xformatter = LONGITUDE_FORMATTER
+g1.yformatter = LATITUDE_FORMATTER
+g1.xlabel_style = {'size': 12}
+g1.ylabel_style = {'size': 12}
+g1.xlabels_top = False
+g1.ylabels_right = False
+ax1.coastlines()
+ax1.plot(106.85, -6.21, 'ro', markersize = 10, transform = ccrs.PlateCarree())
+Q1 = ax1.quiver(combined_Uwind_850hPa_Anomaly.lon[::3].values, combined_Uwind_850hPa_Anomaly.lat[::3].values, 
+         combined_Uwind_850hPa_Anomaly[::3, ::3].values, combined_Vwind_850hPa_Anomaly[::3, ::3].values, scale = 35., width = 0.005, headwidth = 4., headlength = 5.)
+ax1.quiverkey(Q1, 0.745, 0.89, 2, r'$2 \frac{m}{s}$', labelpos = 'E', coordinates = 'figure', fontproperties = {'size': '16'})
+cb1 = fig.colorbar(c1, shrink = 0.8)
+cb1.set_label('Air Temp Anomaly [$^\circ$K]', fontsize = 18)
+cb1.set_ticks(np.arange(-2, 2.1, 0.4))
+cb1.ax.tick_params(labelsize = 14)
+########################################################################################################
+
+ax2 = fig.add_subplot(2, 1, 2, projection = ccrs.PlateCarree(central_longitude = 180))
+ax2.set_title('850-hPa SpecHum & Wind Anomalies: DJF', fontsize = 22)
+ax2.set_extent([29.9, 180.1, -45.1, 45.1], ccrs.PlateCarree())
+c2 = ax2.contourf(combined_SpecHum_850hPa_Anomaly.lon, combined_SpecHum_850hPa_Anomaly.lat, combined_SpecHum_850hPa_Anomaly, levels = np.linspace(-1, 1, 11), transform = ccrs.PlateCarree(), cmap = 'BrBG', alpha = 0.8)
+g2 = ax2.gridlines(crs = ccrs.PlateCarree(), draw_labels = True,
+                  linewidth = 1, color = 'gray', alpha = 0.5, linestyle = '-')
+g2.xlocator = mticker.FixedLocator(np.arange(30, 181, 15))
+g2.ylocator = mticker.FixedLocator(np.arange(-90, 91, 15))
+g2.xformatter = LONGITUDE_FORMATTER
+g2.yformatter = LATITUDE_FORMATTER
+g2.xlabel_style = {'size': 12}
+g2.ylabel_style = {'size': 12}
+g2.xlabels_top = False
+g2.ylabels_right = False
+ax2.coastlines()
+ax2.plot(106.85, -6.21, 'ro', markersize = 10, transform = ccrs.PlateCarree())
+Q2 = ax2.quiver(combined_Uwind_850hPa_Anomaly.lon[::3].values, combined_Uwind_850hPa_Anomaly.lat[::3].values, 
+         combined_Uwind_850hPa_Anomaly[::3, ::3].values, combined_Vwind_850hPa_Anomaly[::3, ::3].values, scale = 35., width = 0.005, headwidth = 4., headlength = 5.)
+ax2.quiverkey(Q2, 0.745, 0.478, 2, r'$2 \frac{m}{s}$', labelpos = 'E', coordinates = 'figure', fontproperties = {'size': '16'})
+cb2 = fig.colorbar(c2, shrink = 0.8)
+cb2.set_label('SpecHum Anomaly [g $kg^{-1}$]', fontsize = 18)
+cb2.set_ticks(np.arange(-1, 1.1, 0.2))
+cb2.ax.tick_params(labelsize = 14)
+
+plt.show()
+
+# figstring = '/content/drive/My Drive/Colab Notebooks/Project 3/JakartaIndonesia_850hPa_AirTemp&SpecHum&WindAnomalies_DJF.png'
+# fig.savefig(figstring, orientation = 'landscape', dpi = 300)
+
+## Plotting Precipitable Water, Surface Skin Temperature, and Surface Wind Anomalies
+
+from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
+
+fig = plt.figure(figsize = (15, 15))
+
+ax1 = fig.add_subplot(2, 1, 1, projection = ccrs.PlateCarree(central_longitude = 180))
+ax1.set_title('Sfc Skin Temp & Wind Anomalies: DJF', fontsize = 22)
+ax1.set_extent([29.9, 180.1, -45.1, 45.1], ccrs.PlateCarree())
+c1 = ax1.contourf(combined_SkinTemp_Sfc_Anomaly.lon, combined_SkinTemp_Sfc_Anomaly.lat, combined_SkinTemp_Sfc_Anomaly, levels = np.linspace(-3, 3, 21), transform = ccrs.PlateCarree(), cmap = 'PuOr_r', alpha = 0.8)
+g1 = ax1.gridlines(crs = ccrs.PlateCarree(), draw_labels = True,
+                  linewidth = 1, color = 'gray', alpha = 0.5, linestyle = '-')
+g1.xlocator = mticker.FixedLocator(np.arange(30, 181, 15))
+g1.ylocator = mticker.FixedLocator(np.arange(-90, 91, 15))
+g1.xformatter = LONGITUDE_FORMATTER
+g1.yformatter = LATITUDE_FORMATTER
+g1.xlabel_style = {'size': 12}
+g1.ylabel_style = {'size': 12}
+g1.xlabels_top = False
+g1.ylabels_right = False
+ax1.coastlines()
+ax1.plot(106.85, -6.21, 'ro', markersize = 10, transform = ccrs.PlateCarree())
+Q1 = ax1.quiver(combined_Uwind_sig995_Anomaly.lon[::3].values, combined_Uwind_sig995_Anomaly.lat[::3].values, 
+         combined_Uwind_sig995_Anomaly[::3, ::3].values, combined_Uwind_sig995_Anomaly[::3, ::3].values, scale = 35., width = 0.005, headwidth = 4., headlength = 5.)
+ax1.quiverkey(Q1, 0.745, 0.89, 2, r'$2 \frac{m}{s}$', labelpos = 'E',coordinates = 'figure', fontproperties = {'size': '16'})
+cb1 = fig.colorbar(c1, shrink = 0.8)
+cb1.set_label('Skin Temp Anomaly [$^\circ$K]', fontsize = 18)
+cb1.set_ticks(np.arange(-3, 3.1, 0.6))
+cb1.ax.tick_params(labelsize = 14)
+########################################################################################################
+
+ax2 = fig.add_subplot(2, 1, 2, projection = ccrs.PlateCarree(central_longitude = 180))
+ax2.set_title('PWAT Anomaly: DJF', fontsize = 22)
+ax2.set_extent([29.9, 180.1, -45.1, 45.1], ccrs.PlateCarree())
+c2 = ax2.contourf(combined_SpecHum_850hPa_Anomaly.lon, combined_SpecHum_850hPa_Anomaly.lat, combined_SpecHum_850hPa_Anomaly, levels = np.linspace(-1, 1, 21), transform = ccrs.PlateCarree(), cmap = 'RdYlGn', alpha = 0.8)
+g2 = ax2.gridlines(crs = ccrs.PlateCarree(), draw_labels = True,
+                  linewidth = 1, color = 'gray', alpha = 0.5, linestyle = '-')
+g2.xlocator = mticker.FixedLocator(np.arange(30, 181, 15))
+g2.ylocator = mticker.FixedLocator(np.arange(-90, 91, 15))
+g2.xformatter = LONGITUDE_FORMATTER
+g2.yformatter = LATITUDE_FORMATTER
+g2.xlabel_style = {'size': 12}
+g2.ylabel_style = {'size': 12}
+g2.xlabels_top = False
+g2.ylabels_right = False
+ax2.coastlines()
+ax2.plot(106.85, -6.21, 'ro', markersize = 10, transform = ccrs.PlateCarree())
+cb2 = fig.colorbar(c2, shrink = 0.8)
+cb2.set_label('PWAT Anomaly [mm]', fontsize = 18)
+cb2.set_ticks(np.arange(-1, 1.1, 0.2))
+cb2.ax.tick_params(labelsize = 14)
+
+plt.show()
+
+# figstring = '/content/drive/My Drive/Colab Notebooks/Project 3/JakartaIndonesia_SfcSkinTemp&WindAnomalies_PWATAnomalies_DJF.png'
+# fig.savefig(figstring, orientation = 'landscape', dpi = 300)
